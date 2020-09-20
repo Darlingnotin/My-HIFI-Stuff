@@ -17,6 +17,9 @@
             sourceUrl: sourceUrl,
             dpi: 8,
             maxFPS: 60,
+            grab: {
+                "grabbable": false,
+            },
         });
         _entityID = entityID;
         Entities.webEventReceived.connect(onWebEvent);
