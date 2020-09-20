@@ -3,7 +3,7 @@
     var script = this;
     var entity;
     var _entityID;
-    var sourceUrl = Script.resolvePath("videoSync" + "?" + Date.now());
+    var sourceUrl = Script.resolvePath("videoSync.html" + "?" + Date.now());
     var leaveButtonFbxUrl = Script.resolvePath("assets/leave.fbx");
     var playButtonFbxUrl = Script.resolvePath("assets/playButton.fbx");
     var pauseButtonURL = Script.resolvePath("assets/pauseButton.fbx");
