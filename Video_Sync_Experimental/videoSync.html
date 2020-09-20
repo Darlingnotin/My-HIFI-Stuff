@@ -88,14 +88,36 @@
         } else {
           document.getElementById('video').currentTime = messageData.timeStamp;
         }
-      } else if (messageData.action == "buttonAction" && messageData.buttonAction != "leave") {
-        if (messageData.buttonAction == "pause" || "play") {
+      } else if (messageData.action == "buttonAction") {
+        if (messageData.buttonAction == "leave") {
+          document.getElementById('video').src = "http://";
+          firstTime = true;
+          HasBeenClicked = false;
+        } else if (messageData.buttonAction == "volumeButtonMinus") {
+          var video = document.getElementById('video');
+          var volume = video.volume;
+          var chosenVolume;
+          if (volume - 0.1 < 0.1) {
+            chosenVolume = 0;
+          } else {
+            chosenVolume = volume - 0.1;
+          }
+          video.volume = chosenVolume.toFixed(1);
+        } else if (messageData.buttonAction == "volumeButtonPlus") {
+          var video = document.getElementById('video');
+          var volume = video.volume;
+          var chosenVolume;
+          if (video.volume.toFixed(1) == 1) {
+            chosenVolume = 1;
+          } else {
+            chosenVolume = volume + 0.1;
+          }
+          video.volume = chosenVolume.toFixed(1);
+        } else if (messageData.buttonAction == "pause" && !firstTime) {
+          sendButtonAction(messageData.buttonAction);
+        } else if (messageData.buttonAction == "play" && !firstTime) {
           sendButtonAction(messageData.buttonAction);
         }
-      } else if (messageData.action == "buttonAction" && messageData.buttonAction == "leave") {
-        document.getElementById('video').src = "http://";
-        firstTime = true;
-        HasBeenClicked = false;
       }
     });
 
