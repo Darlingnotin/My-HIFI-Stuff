@@ -7,6 +7,9 @@
     var leaveButtonFbxUrl = Script.resolvePath("assets/leave.fbx");
     var playButtonFbxUrl = Script.resolvePath("assets/playButton.fbx");
     var pauseButtonURL = Script.resolvePath("assets/pauseButton.fbx");
+    var volumeButtonPlusUrl = Script.resolvePath("assets/volumeButtonPlus.fbx");
+    var volumeButtonPlus;
+    var volumeButtonMinus;
     var playButtonUuid;
     var pauseButtonUuid;
     var leaveButtonUuid;
@@ -107,6 +110,40 @@
             visible: false
         }, "local");
         Script.addEventHandler(playButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
+
+        volumeButtonMinus = Entities.addEntity({
+            type: "Model",
+            modelURL: leaveButtonFbxUrl,
+            parentID: _entityID,
+            triggerable: true,
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - 0.2, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 })),
+            dimensions: {
+                "x": 0.2284,
+                "y": 0.0779,
+                "z": 0.0193
+            },
+            grab: {
+                "grabbable": false,
+            },
+        }, "local");
+        Script.addEventHandler(volumeButtonMinus, "mousePressOnEntity", evaluateWhichButtonPressed);
+
+        volumeButtonPlus = Entities.addEntity({
+            type: "Model",
+            modelURL: volumeButtonPlusUrl,
+            parentID: _entityID,
+            triggerable: true,
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - 0.5, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 })),
+            dimensions: {
+                "x": 0.22840283811092377,
+                "y": 0.22654350101947784,
+                "z": 0.019338179379701614
+            },
+            grab: {
+                "grabbable": false,
+            },
+        }, "local");
+        Script.addEventHandler(volumeButtonPlus, "mousePressOnEntity", evaluateWhichButtonPressed);
     }
 
     function evaluateWhichButtonPressed(mousePressEntityID, event) {
@@ -123,6 +160,14 @@
             case playButtonUuid:
                 console.log("playButtonUuid Yes");
                 actOnButtonPressed("play");
+                break;
+            case volumeButtonMinus:
+                console.log("volumeButtonMinus Yes");
+                actOnButtonPressed("volumeButtonMinus");
+                break;
+            case volumeButtonPlus:
+                console.log("volumeButtonPlus Yes");
+                actOnButtonPressed("volumeButtonPlus");
                 break;
         }
     }
@@ -143,6 +188,14 @@
             visible: hideOrReveal,
             position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - entity.dimensions.x - -0.5, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 }))
         });
+
+        Entities.editEntity(volumeButtonMinus, {
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - 0.2, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 }))
+        });
+
+        Entities.editEntity(volumeButtonPlus, {
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - 0.5, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 }))
+        });
     }
 
     function actOnButtonPressed(buttonAction) {
@@ -157,6 +210,10 @@
         Entities.deleteEntity(leaveButtonUuid);
         Entities.deleteEntity(pauseButtonUuid);
         Entities.deleteEntity(playButtonUuid);
+        Entities.deleteEntity(volumeButtonMinus);
+        Entities.deleteEntity(volumeButtonPlus);
+        Script.removeEventHandler(volumeButtonPlus, "mousePressOnEntity", evaluateWhichButtonPressed);
+        Script.removeEventHandler(volumeButtonMinus, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(leaveButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(pauseButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(playButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
