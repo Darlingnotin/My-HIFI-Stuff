@@ -1,6 +1,7 @@
 (function () {
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
     var videoSyncInterface = Script.resolvePath("assets/videoSyncInterface.html");
+    var videoSyncServerScriptUrl = Script.resolvePath("videoSyncServerScript.js");
     var uuid;
     var script = this;
     var entity;
@@ -38,7 +39,7 @@
     }
 
     script.preload = function (entityID) {
-        entity = Entities.getEntityProperties(entityID, ["position", "dimensions", "rotation"]);
+        entity = Entities.getEntityProperties(entityID, ["position", "dimensions", "rotation", "serverScripts"]);
         Entities.editEntity(entityID, {
             sourceUrl: sourceUrl,
             dpi: 8,
@@ -47,6 +48,11 @@
                 "grabbable": false,
             },
         });
+        if (entity.serverScripts == "") {
+            Entities.editEntity(entityID, {
+                serverScripts: videoSyncServerScriptUrl
+            });
+        }
         _entityID = entityID;
         Entities.webEventReceived.connect(onWebEvent);
         addButtons();
