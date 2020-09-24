@@ -21,9 +21,10 @@
     var buttonsAreActive = false;
     var hasInteractedWithWebPage = false;
     var webPanelTimeStamp;
+    var interfaceButtonActive = false;
 
     function openVideoInter() {
-        if (buttonsAreActive) {
+        if (buttonsAreActive || interfaceButtonActive) {
             tablet.gotoWebScreen(videoSyncInterface);
         }
     };
@@ -81,6 +82,8 @@
                 hideAndRevealButtons(buttonsAreActive);
             } else if (messageData.videoUrl == "") {
                 hasInteractedWithWebPage = true;
+                interfaceButtonActive = true;
+                addInterfaceButton();
             }
         } else if (messageData.action == "now" && hasInteractedWithWebPage) {
             buttonsAreActive = true;
@@ -206,6 +209,7 @@
                 console.log("LeaveButtonUuid Yes");
                 actOnButtonPressed("leave");
                 buttonsAreActive = false;
+                interfaceButtonActive = false;
                 hideAndRevealButtons(buttonsAreActive);
                 break;
             case playButtonUuid:
@@ -225,6 +229,13 @@
                 openVideoInter();
                 break;
         }
+    }
+
+    function addInterfaceButton() {
+        Entities.editEntity(videoInterfaceButtonUuid, {
+            visible: true,
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - entity.dimensions.x + 0.5, y: entity.dimensions.y / 2 + 0.4, z: 0 }))
+        });
     }
 
     function hideAndRevealButtons(hideOrReveal) {
