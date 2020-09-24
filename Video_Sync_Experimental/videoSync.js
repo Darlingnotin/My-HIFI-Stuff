@@ -1,4 +1,6 @@
 (function () {
+    var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
+    var videoSyncInterface = Script.resolvePath("assets/videoSyncInterface.html");
     var uuid;
     var script = this;
     var entity;
@@ -15,8 +17,25 @@
     var pauseButtonUuid;
     var leaveButtonUuid;
     var videoInterfaceButtonUuid;
+    var buttonsAreActive = false;
     var hasInteractedWithWebPage = false;
     var webPanelTimeStamp;
+
+    function openVideoInter() {
+        if (buttonsAreActive) {
+            tablet.gotoWebScreen(videoSyncInterface);
+        }
+    };
+
+    tablet.webEventReceived.connect(onTabletWebEvent);
+
+    function onTabletWebEvent(event) {
+        var webEventData = JSON.parse(event);
+        console.log(JSON.stringify(webEventData));
+        if (webEventData.action == "nowVideoFromTablet") {
+            sendMessage(event);
+        }
+    }
 
     script.preload = function (entityID) {
         entity = Entities.getEntityProperties(entityID, ["position", "dimensions", "rotation"]);
@@ -52,12 +71,14 @@
         console.log("Message Received " + JSON.stringify(messageData));
         if (messageData.action == "sync" && webPanelTimeStamp == messageData.myTimeStamp) {
             if (messageData.videoUrl != "") {
-                hideAndRevealButtons(true);
+                buttonsAreActive = true;
+                hideAndRevealButtons(buttonsAreActive);
             } else if (messageData.videoUrl == "") {
                 hasInteractedWithWebPage = true;
             }
         } else if (messageData.action == "now" && hasInteractedWithWebPage) {
-            hideAndRevealButtons(true);
+            buttonsAreActive = true;
+            hideAndRevealButtons(buttonsAreActive);
         }
         sendMessage(message);
     }
@@ -178,7 +199,8 @@
             case leaveButtonUuid:
                 console.log("LeaveButtonUuid Yes");
                 actOnButtonPressed("leave");
-                hideAndRevealButtons(false);
+                buttonsAreActive = false;
+                hideAndRevealButtons(buttonsAreActive);
                 break;
             case playButtonUuid:
                 console.log("playButtonUuid Yes");
@@ -194,6 +216,7 @@
                 break;
             case videoInterfaceButtonUuid:
                 console.log("videoInterfaceButton Yes");
+                openVideoInter();
                 break;
         }
     }
@@ -259,6 +282,7 @@
         Entities.deleteEntity(uuid);
         Messages.messageReceived.disconnect(onMessageReceived);
         Entities.webEventReceived.disconnect(onWebEvent);
+        tablet.webEventReceived.disconnect(onTabletWebEvent);
         removeButtons();
     }
 });
