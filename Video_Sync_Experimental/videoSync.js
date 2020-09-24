@@ -8,11 +8,15 @@
     var playButtonFbxUrl = Script.resolvePath("assets/playButton.fbx");
     var pauseButtonURL = Script.resolvePath("assets/pauseButton.fbx");
     var volumeButtonPlusUrl = Script.resolvePath("assets/volumeButtonPlus.fbx");
+    var videoInterfaceButton = Script.resolvePath("assets/videoInterfaceButton.fbx");
     var volumeButtonPlus;
     var volumeButtonMinus;
     var playButtonUuid;
     var pauseButtonUuid;
     var leaveButtonUuid;
+    var videoInterfaceButtonUuid;
+    var hasInteractedWithWebPage = false;
+    var webPanelTimeStamp;
 
     script.preload = function (entityID) {
         entity = Entities.getEntityProperties(entityID, ["position", "dimensions", "rotation"]);
@@ -33,6 +37,9 @@
         if (uuid == _entityID) {
             var messageData = JSON.parse(event);
             console.log("Web Event " + JSON.stringify(messageData));
+            if (messageData.action == "requestSync") {
+                webPanelTimeStamp = messageData.myTimeStamp;
+            }
             Messages.sendMessage("videoPlayOnEntity", event);
         }
     }
@@ -43,11 +50,14 @@
         }
         var messageData = JSON.parse(message);
         console.log("Message Received " + JSON.stringify(messageData));
-        if (messageData.action == "sync") {
+        if (messageData.action == "sync" && webPanelTimeStamp == messageData.myTimeStamp) {
             if (messageData.videoUrl != "") {
-                sendMessage(message);
                 hideAndRevealButtons(true);
+            } else if (messageData.videoUrl == "") {
+                hasInteractedWithWebPage = true;
             }
+        } else if (messageData.action == "now" && hasInteractedWithWebPage) {
+            hideAndRevealButtons(true);
         }
         sendMessage(message);
     }
@@ -144,6 +154,19 @@
             },
         }, "local");
         Script.addEventHandler(volumeButtonPlus, "mousePressOnEntity", evaluateWhichButtonPressed);
+
+        videoInterfaceButtonUuid = Entities.addEntity({
+            type: "Model",
+            modelURL: videoInterfaceButton,
+            parentID: _entityID,
+            triggerable: true,
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - entity.dimensions.x + 0.5, y: entity.dimensions.y / 2 + 0.4, z: 0 })),
+            grab: {
+                "grabbable": false,
+            },
+            visible: false
+        }, "local");
+        Script.addEventHandler(videoInterfaceButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
     }
 
     function evaluateWhichButtonPressed(mousePressEntityID, event) {
@@ -168,6 +191,9 @@
             case volumeButtonPlus:
                 console.log("volumeButtonPlus Yes");
                 actOnButtonPressed("volumeButtonPlus");
+                break;
+            case videoInterfaceButtonUuid:
+                console.log("videoInterfaceButton Yes");
                 break;
         }
     }
@@ -196,6 +222,11 @@
         Entities.editEntity(volumeButtonPlus, {
             position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - 0.5, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 }))
         });
+
+        Entities.editEntity(videoInterfaceButtonUuid, {
+            visible: hideOrReveal,
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - entity.dimensions.x + 0.5, y: entity.dimensions.y / 2 + 0.4, z: 0 }))
+        });
     }
 
     function actOnButtonPressed(buttonAction) {
@@ -212,6 +243,8 @@
         Entities.deleteEntity(playButtonUuid);
         Entities.deleteEntity(volumeButtonMinus);
         Entities.deleteEntity(volumeButtonPlus);
+        Entities.deleteEntity(videoInterfaceButtonUuid);
+        Script.removeEventHandler(videoInterfaceButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(volumeButtonPlus, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(volumeButtonMinus, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(leaveButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
