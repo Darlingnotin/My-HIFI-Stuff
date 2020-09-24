@@ -69,7 +69,7 @@
         document.getElementById('video').currentTime = messageData.timeStamp;
       } else if (messageData.action == 'pause' && !firstTime) {
         document.getElementById('video').pause();
-      } else if (messageData.action == 'now') {
+      } else if (messageData.action == 'now' && messageData.myTimeStamp != myTimeStamp) {
         if (!firstTime || HasBeenClicked) {
           document.getElementById('video').src = messageData.videoUrl;
           firstTime = false;
@@ -88,6 +88,21 @@
         } else {
           document.getElementById('video').currentTime = messageData.timeStamp;
         }
+      } else if (messageData.action == "nowVideoFromTablet") {
+        document.getElementById('video').src = messageData.videoUrl;
+        firstTime = false;
+        var vid = document.getElementById("video");
+        vid.onloadeddata = function () {
+          var v = document.getElementById('video');
+          var readyEvent = {
+            action: "now",
+            videoUrl: messageData.videoUrl,
+            length: v.duration,
+            timeStamp: v.currentTime,
+            myTimeStamp: myTimeStamp
+          };
+          EventBridge.emitWebEvent(JSON.stringify(readyEvent));
+        };
       } else if (messageData.action == "buttonAction") {
         if (messageData.buttonAction == "leave") {
           document.getElementById('video').src = "http://";
