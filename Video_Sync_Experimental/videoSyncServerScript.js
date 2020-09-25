@@ -48,6 +48,7 @@
                     timeStamp: timeStamp,
                     videoUrl: videoUrl,
                     nowVideo: "false",
+                    videoPlaying: intervalIsRunning,
                     myTimeStamp: messageData.myTimeStamp
                 };
                 var message = JSON.stringify(readyEvent);
