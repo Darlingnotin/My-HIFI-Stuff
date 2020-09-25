@@ -2,6 +2,7 @@
     var tablet = Tablet.getTablet("com.highfidelity.interface.tablet.system");
     var videoSyncInterface = Script.resolvePath("assets/videoSyncInterface.html");
     var videoSyncServerScriptUrl = Script.resolvePath("videoSyncServerScript.js");
+    var volumeSliderSourceUrl = Script.resolvePath("assets/volumeSlider.html");
     var uuid;
     var script = this;
     var entity;
@@ -18,11 +19,11 @@
     var pauseButtonUuid;
     var leaveButtonUuid;
     var videoInterfaceButtonUuid;
+    var volumeSliderUuid;
     var buttonsAreActive = false;
     var hasInteractedWithWebPage = false;
     var webPanelTimeStamp;
     var interfaceButtonActive = false;
-
 
     function openVideoInter() {
         if (buttonsAreActive || interfaceButtonActive) {
@@ -205,6 +206,26 @@
             visible: false
         }, "local");
         Script.addEventHandler(videoInterfaceButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
+
+        volumeSliderUuid = Entities.addEntity({
+            type: "Web",
+            dpi: 8,
+            sourceUrl: volumeSliderSourceUrl,
+            parentID: uuid,
+            //visible: false,
+            dimensions: {
+                "x": 1.3687,
+                "y": 0.3429,
+                "z": 0.0010
+            },
+            registrationPoint: {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0
+            },
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - 1.4, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 })),
+            rotation: entity.rotation
+        }, "local");
     }
 
     function evaluateWhichButtonPressed(mousePressEntityID, event) {
@@ -275,6 +296,11 @@
             visible: hideOrReveal,
             position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - entity.dimensions.x + 0.5, y: entity.dimensions.y / 2 + 0.4, z: 0 }))
         });
+
+        Entities.editEntity(volumeSliderUuid, {
+            position: Vec3.sum(entity.position, Vec3.multiplyQbyV(entity.rotation, { x: entity.dimensions.x / 2 - 1.4, y: entity.dimensions.y / 2 - entity.dimensions.y - 0.2, z: 0 })),
+            rotation: entity.rotation
+        });
     }
 
     function actOnButtonPressed(buttonAction) {
@@ -292,6 +318,7 @@
         Entities.deleteEntity(volumeButtonMinus);
         Entities.deleteEntity(volumeButtonPlus);
         Entities.deleteEntity(videoInterfaceButtonUuid);
+        Entities.deleteEntity(volumeSliderUuid);
         Script.removeEventHandler(videoInterfaceButtonUuid, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(volumeButtonPlus, "mousePressOnEntity", evaluateWhichButtonPressed);
         Script.removeEventHandler(volumeButtonMinus, "mousePressOnEntity", evaluateWhichButtonPressed);
