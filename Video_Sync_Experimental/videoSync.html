@@ -79,6 +79,12 @@
           document.getElementById('video').src = messageData.videoUrl;
           document.getElementById('video').currentTime = messageData.timeStamp;
           firstTime = false;
+          if (!messageData.videoPlaying) {
+            var vid = document.getElementById("video");
+            vid.onloadeddata = function () {
+              document.getElementById('video').pause();
+            };
+          }
         }
       } else if (messageData.action == 'ping' && !firstTime) {
         var video = document.getElementById('video');
@@ -133,6 +139,15 @@
         } else if (messageData.buttonAction == "play" && !firstTime) {
           sendButtonAction(messageData.buttonAction);
         }
+      } else if (messageData.action == "RequestVideoLengthAndTimeStamp") {
+        var v = document.getElementById('video');
+        var readyEvent = {
+          action: "RequestVideoLengthAndTimeStampResponse",
+          length: v.duration,
+          timeStamp: v.currentTime,
+          myTimeStamp: messageData.myTimeStamp
+        };
+        EventBridge.emitWebEvent(JSON.stringify(readyEvent));
       }
     });
 
