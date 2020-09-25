@@ -66,13 +66,16 @@
     }
 
     function onWebEvent(uuid, event) {
-        if (uuid == _entityID) {
+        if (uuid == _entityID || volumeSliderUuid == uuid) {
             var messageData = JSON.parse(event);
             console.log("Web Event " + JSON.stringify(messageData));
             if (messageData.action == "requestSync") {
                 webPanelTimeStamp = messageData.myTimeStamp;
             } else if (messageData.action == "RequestVideoLengthAndTimeStampResponse") {
                 tablet.emitScriptEvent(event);
+                return;
+            } else if (messageData.action == "volumeSlider") {
+                sendMessage(event);
                 return;
             }
             Messages.sendMessage("videoPlayOnEntity", event);
