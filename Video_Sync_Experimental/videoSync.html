@@ -148,6 +148,9 @@
           myTimeStamp: messageData.myTimeStamp
         };
         EventBridge.emitWebEvent(JSON.stringify(readyEvent));
+      } else if (messageData.action == "volumeSlider") {
+        video = document.getElementById('video');
+        video.volume = parseFloat(messageData.volume);
       }
     });
 
