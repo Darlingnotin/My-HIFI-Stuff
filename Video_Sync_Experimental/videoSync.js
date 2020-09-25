@@ -23,6 +23,7 @@
     var webPanelTimeStamp;
     var interfaceButtonActive = false;
 
+
     function openVideoInter() {
         if (buttonsAreActive || interfaceButtonActive) {
             tablet.gotoWebScreen(videoSyncInterface);
@@ -36,6 +37,10 @@
         console.log(JSON.stringify(webEventData));
         if (webEventData.action == "nowVideoFromTablet") {
             sendMessage(event);
+        } else if (webEventData.action == "RequestVideoLengthAndTimeStamp") {
+            sendMessage(event);
+        } else if (webEventData.action == "play") {
+            Messages.sendMessage("videoPlayOnEntity", event);
         }
     }
 
@@ -65,6 +70,9 @@
             console.log("Web Event " + JSON.stringify(messageData));
             if (messageData.action == "requestSync") {
                 webPanelTimeStamp = messageData.myTimeStamp;
+            } else if (messageData.action == "RequestVideoLengthAndTimeStampResponse") {
+                tablet.emitScriptEvent(event);
+                return;
             }
             Messages.sendMessage("videoPlayOnEntity", event);
         }
