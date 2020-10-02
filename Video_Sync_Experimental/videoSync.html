@@ -51,6 +51,7 @@
     var firstTime = true;
     var myTimeStamp = Date.now();
     var HasBeenClicked = false;
+    var videoLoaded = false;
 
     function requestSync() {
       if (firstTime) {
@@ -95,17 +96,28 @@
           document.getElementById('video').currentTime = messageData.timeStamp;
         }
       } else if (messageData.action == "nowVideoFromTablet") {
+        videoLoaded = false;
         document.getElementById('video').src = messageData.videoUrl;
         firstTime = false;
         var v = document.getElementById('video');
-        var readyEvent = {
-          action: "now",
-          videoUrl: messageData.videoUrl,
-          length: v.duration,
-          timeStamp: v.currentTime,
-          myTimeStamp: myTimeStamp
+        v.onloadeddata = function () {
+          videoLoaded = true;
         };
-        EventBridge.emitWebEvent(JSON.stringify(readyEvent));
+        var videoLoadedSendMessageInterval = setInterval(() => {
+          if (videoLoaded) {
+            var v = document.getElementById('video');
+            var readyEvent = {
+              action: "now",
+              videoUrl: messageData.videoUrl,
+              length: v.duration,
+              timeStamp: v.currentTime,
+              myTimeStamp: myTimeStamp
+            };
+            EventBridge.emitWebEvent(JSON.stringify(readyEvent));
+            clearInterval(videoLoadedSendMessageInterval);
+            videoLoaded = false;
+          }
+        }, 100);
       } else if (messageData.action == "buttonAction") {
         if (messageData.buttonAction == "leave") {
           document.getElementById('video').src = "http://";
